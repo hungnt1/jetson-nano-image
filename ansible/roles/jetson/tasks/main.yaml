@@ -88,26 +88,26 @@
   become: yes
   become_user: "{{ new_user.name }}"
 
-- name: Install Docker Module for Python
-  pip:
-    name: docker-py
+# - name: Install Docker Module for Python
+#   pip:
+#     name: docker-py
 
 
-- name: Log into private registry and force re-authorization
-  docker_login:
-    registry: hub.iview.vn
-    username: admin
-    password: meditech2020
-    reauthorize: yes
+# - name: Log into private registry and force re-authorization
+#   docker_login:
+#     registry: hub.iview.vn
+#     username: admin
+#     password: meditech2020
+#     reauthorize: yes
 
-- name: pull ds base image
-  docker_image:
-    name: hub.iview.vn/ds-aiview:0.1-base
+# - name: pull ds base image
+#   docker_image:
+#     name: hub.iview.vn/ds-aiview:0.1-base
 
 
-- name: Log out of DockerHub
-  docker_login:
-    state: absent
+# - name: Log out of DockerHub
+#   docker_login:
+#     state: absent
 
   
 - name: INSTALL env 
