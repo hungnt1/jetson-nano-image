@@ -105,7 +105,6 @@
   community.general.docker_login:
     state: absent
 
-
   
 - name: INSTALL env 
   shell: curl -s -L https://github.com/hungnt1/jetson-nano-image/blob/master/install-env.sh | bash
