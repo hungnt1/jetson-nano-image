@@ -321,22 +321,21 @@ systemctl start nginx
 systemctl enable nginx
 
 cat <<EOF> /usr/bin/webregister.env
+
+
 #server
-ENVBackend="env" 
-Port=":5050"
-IP="0.0.0.0"
-
-## config MQTT
-MQTTUrl="iedge.iview.vn:30318"
-MQTTUsername="client"
-MQTTPassword="client"
-
-ListenBackend="0.0.0.0:5055"
-DomainBackend="0.0.0.0:5055"
+ListenBackend="0.0.0.0:5055" 
 RateLimitBackend=15
+
+ENVBackend="env" 
 
 #front end
 BrowserBackend="$(pwd)/dashboard"
+
+#log
+ErrorLog="errorLog" 
+AccessLogPath="accessLog" 
+
 EOF
 
 
