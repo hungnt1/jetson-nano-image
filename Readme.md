@@ -20,15 +20,14 @@ sudo -E ./create-image.sh
 
 Install AI dependency
 ```
-copy pkg inside chroot folder
+chroot inside chroot
 
-chroot $JETSON_ROOTFS_DIR
+run install-env.sh file
 
+After that please install your AI dependency. you can use apt install *.dev
 
-move to deb folder
+after that please login to docker hub
 
-sudo apt-get install *.deb
-
-
+pull your image and logout
 
 ```

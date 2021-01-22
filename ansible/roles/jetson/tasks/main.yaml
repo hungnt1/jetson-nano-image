@@ -110,5 +110,5 @@
 #     state: absent
 
   
-- name: INSTALL env 
-  shell: curl -s -L https://raw.githubusercontent.com/hungnt1/jetson-nano-image/master/install-env.sh | bash
+# - name: INSTALL env 
+#   shell: curl -s -L https://raw.githubusercontent.com/hungnt1/jetson-nano-image/master/install-env.sh | bash
