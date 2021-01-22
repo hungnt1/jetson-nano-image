@@ -41,6 +41,7 @@
     - usbutils
     - vim
     - wpasupplicant
+    - python3-pip
 
 - name: Remove the netplan package
   package:
