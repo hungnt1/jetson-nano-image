@@ -86,9 +86,8 @@ apt-get install -y dialog apt-utils
 apt-get install -y libpam-kwallet4 libpam-kwallet5 libpam-winbind
 mkdir /usr/share/xsessions
 
-
-#systemctl stop NetworkManager  
-#systemctl disable NetworkManager 
+systemctl stop NetworkManager  
+systemctl disable NetworkManager 
 
 printf "=========================================================================\n"
 printf "=========================================================================\n"
@@ -129,10 +128,13 @@ cat <<EOF> /etc/docker/daemon.json
     },
     "dns": ["8.8.8.8", "8.8.4.4"]
 
-} 
+}
 EOF
+
 systemctl restart docker  
 systemctl enable docker 
+
+
 
 print_style "OK \n" "success";
 
@@ -297,13 +299,12 @@ printf "========================================================================
 
 rm -rf /tmp/iedge /tmp/iedge.zip 
 rm -rf /var/www/html/*
-wget https://github.com/Edge-IVIEW/iEdge/releases/download/0.1-beta.1/0.1-beta.1.zip -O /tmp/iedge.zip 
+wget https://github.com/Edge-IVIEW/iEdge/releases/download/0.1/iedge.zip -O /tmp/iedge.zip 
 unzip /tmp/iedge.zip -d /tmp/iedge 
 mv /tmp/iedge/register.zip /var/www/html/
 unzip /var/www/html/register.zip  -d /var/www/html/ 
-cp /tmp/iedge/webregister /usr/bin/webregister
+mv /tmp/iedge/webregister /usr/bin/webregister
 
-cp /tmp/iedge/start-chrome.sh /home/kiosk/start-chrome.sh
 chmod +x /home/kiosk/start-chrome.sh
 
 cat <<EOF> /etc/nginx/sites-available/default
@@ -321,8 +322,6 @@ systemctl start nginx
 systemctl enable nginx
 
 cat <<EOF> /usr/bin/webregister.env
-
-
 #server
 ListenBackend="0.0.0.0:5055" 
 RateLimitBackend=15
@@ -337,7 +336,6 @@ ErrorLog="errorLog"
 AccessLogPath="accessLog" 
 
 EOF
-
 
 
 cat <<EOF> /etc/systemd/system/webregis.service
@@ -364,7 +362,6 @@ print_style "Cap nhat Docker base  \n" "info";
 printf "=========================================================================\n"
 chown kiosk:kiosk -R .
 
-
 echo 'kiosk ALL=(ALL) NOPASSWD: ALL' | sudo tee -i /etc/sudoers.d/kiosk
 chown kiosk:kiosk /home/kiosk -R .
 chown kiosk:kiosk /home/kiosk -R *
@@ -372,10 +369,83 @@ chown kiosk:kiosk /home/kiosk -R *
 print_style "OK \n" "success";
 
 
+printf "=========================================================================\n"
+print_style "Cau hinh start chrome \n" "info";
+printf "=========================================================================\n"
+
+cat <<EOF>/home/kiosk/start-chrome.sh
+
+#!/bin/bash
+
+export DISPLAY=:0
+
+
+X_RES=`xrandr | grep "*" | awk -Fx '{ print $1 }' | sed 's/[^0-9]*//g'`
+Y_RES=`xrandr | grep "*" | awk -Fx '{ print $2 }' | awk '{ print $1 }'`
+
+# Prevents screen blanking
+xset s off
+xset s noblank
+xset -dpms
+
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+gsettings set org.gnome.desktop.session idle-delay 0
+
+
+# NVIDIA CUDA Toolkit
+export PATH=/usr/local/cuda-10.0/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-10.0/lib64
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu
+
+sudo systemctl start docker
+
+
+while ! ping -c 1 -W 1 iedge.iview.vn; do
+
+    DISPLAY=:0 notify-send "Trying connect to IVIEW"
+
+        sleep 5
+done
+
+
+
+device_status=`sudo cat /var/local/status.txt`
+
+if [ "$device_status" == "registed" ]; then
+    DISPLAY=:0 notify-send "Trying to open exists app"
+    sudo systemctl start iedge-agent
+
+    while ! curl http://localhost:5007; do
+      echo "Waiting for backend core start"
+    done
+    chromium-browser --disk-cache-dir=/dev/null --no-sandbox --disable-features=TranslateUI --disable-infobars --disable-translate --no-first-run --noerrdialogs --start-fullscreen --app=http://localhost:80 --user-data-dir=/home/kiosk/.chromium --disable-notifications --window-position=0,0 --window-size=$X_RES,$Y_RES --full-screen --incognito --kiosk
+
+
+else
+    DISPLAY=:0 notify-send "Trying to open regiser app"
+
+    sudo systemctl start webregis
+    while ! curl http://localhost:5055; do
+      echo "Waiting for backend core start"
+    done
+    chromium-browser --disk-cache-dir=/dev/null --no-sandbox --disable-features=TranslateUI --disable-infobars --disable-translate --no-first-run --noerrdialogs --start-fullscreen --app=http://localhost:3000 --user-data-dir=/home/kiosk/.chromium --disable-notifications --window-position=0,0 --window-size=$X_RES,$Y_RES --full-screen --incognito --kiosk
+
+    echo "Thiet bi chua duoc dang ky"
+
+
+fi
+
+
+EOF
+
+
+
 
 printf "=========================================================================\n"
 print_style "Qua trinh cai dat thanh cong. Vui long khoi dong lai device  \n" "info";
 printf "=========================================================================\n"
+
 
 
 exit

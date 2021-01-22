@@ -29,8 +29,8 @@
     - kmod
     - linux-firmware
     - locales
+    - ifupdown
     - net-tools
-    - netplan.io
     - pciutils
     - python3-dev
     - ssh
@@ -42,6 +42,11 @@
     - vim
     - wpasupplicant
 
+- name: Remove the netplan package
+  package:
+    name: netplan.io
+    state: absent
+
 - name: Generate locales
   locale_gen:
     name: en_US.UTF-8
@@ -51,16 +56,17 @@
   shell: systemctl enable {{ item }}
   loop:
     - ssh
+    - networking  
     - systemd-networkd
     - systemd-resolved
 
-- name: Create network conf
-  template:
-    src: etc/netplan/netcfg.yaml
-    dest: /etc/netplan/netcfg.yaml
-    owner: root
-    group: root
-    mode: 0644
+# - name: Create network conf
+#   template:
+#     src: etc/netplan/netcfg.yaml
+#     dest: /etc/netplan/netcfg.yaml
+#     owner: root
+#     group: root
+#     mode: 0644
 
 - name: Create new user
   user:
@@ -80,3 +86,21 @@
   shell: python3 /tmp/get-pip.py --user
   become: yes
   become_user: "{{ new_user.name }}"
+
+
+
+- name: login to docker 
+  community.general.docker_login:
+    registry_url: hub.iview.vn
+    username: admin
+    password: meditech2020
+    reauthorize: yes
+
+- name: pull ds base image
+  docker_image:
+    name: hub.iview.vn/ds-aiview:0.1-base
+
+
+- name: Log out of DockerHub
+  community.general.docker_login:
+    state: absent
