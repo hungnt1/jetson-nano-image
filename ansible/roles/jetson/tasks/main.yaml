@@ -87,6 +87,9 @@
   become: yes
   become_user: "{{ new_user.name }}"
 
+- name: Install Docker Module for Python
+  pip:
+    name: docker-py
 
 
 - name: Log into private registry and force re-authorization
