@@ -89,9 +89,9 @@
 
 
 
-- name: login to docker 
-  community.general.docker_login:
-    registry_url: hub.iview.vn
+- name: Log into private registry and force re-authorization
+  docker_login:
+    registry: hub.iview.vn
     username: admin
     password: meditech2020
     reauthorize: yes
@@ -102,7 +102,7 @@
 
 
 - name: Log out of DockerHub
-  community.general.docker_login:
+  docker_login:
     state: absent
 
   
